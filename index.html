@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth antialiased">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nova — Beautifully Simple Tech</title>
+  <meta name="description" content="A high-end, Apple.com-inspired product site with sliders, parallax, sticky search, and tasteful animations.">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          colors: {
+            base: {
+              50: "#F7F7F8",
+              100: "#F2F2F3",
+              200: "#E6E7E9",
+              900: "#0A0A0B",
+            }
+          },
+          boxShadow: { glass: "0 10px 30px rgba(0,0,0,0.15)" }
+        }
+      },
+      darkMode: 'class'
+    }
+  </script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Swiper slider -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <!-- AOS animations -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+  <script defer src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .header-blur { backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); }
+    .parallax { background-size: cover; background-position: center; background-repeat: no-repeat; will-change: transform; transform: translateZ(0); }
+    .glass { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); }
+    .dark .glass { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body x-data="site()" :class="{'dark': darkMode}" class="bg-base-50 text-base-900 dark:bg-neutral-900 dark:text-neutral-50 selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+
+  <!-- Top progress bar -->
+  <div id="progress" class="fixed left-0 top-0 h-0.5 bg-black dark:bg-white z-[60]" style="width:0;"></div>
+
+  <!-- Sticky Header -->
+  <header x-ref="header" :class="{'header-blur bg-white/70 dark:bg-neutral-900/60 shadow-sm': scrolled}" class="fixed inset-x-0 top-0 z-50 transition-all">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-14 items-center justify-between gap-4">
+        <!-- Left: Logo -->
+        <a href="#" class="flex items-center gap-2 font-semibold tracking-tight">
+          <svg width="20" height="24" viewBox="0 0 20 24" fill="currentColor" class="shrink-0">
+            <path d="M10 0c2.4 0 3.9 1.2 4.8 2.5C16 3.7 16 5 15.2 6c-1 .9-2.4 1.3-3.8.8C11.1 6.6 11 6.3 11 6c0-1.5.7-2.4 1.5-3.4C12 1.2 11 0 10 0zM2.2 7.6C.8 9.6.2 12 .8 14.5 1.6 18.1 4.6 22 8.8 22c1.8 0 3-.7 4.1-.7 1.1 0 2.7.8 4.1.8.8 0 1.5-.1 2.2-.4-1.1-2-1.6-4-1.6-5.1 0-2.4 1.1-3.9 2.4-5.2-1.4-1.7-3.4-2.6-5.2-2.6-1.7 0-2.9.8-3.8.8-.9 0-2.4-.8-4.2-.8-1.6 0-3.4.7-4.4 2z"/>
+          </svg>
+          <span class="hidden sm:block">Nova</span>
+        </a>
+
+        <!-- Center: Nav -->
+        <nav class="hidden md:flex items-center gap-6 text-sm">
+          <a href="#products" class="hover:opacity-70">Products</a>
+          <a href="#features" class="hover:opacity-70">Features</a>
+          <a href="#compare" class="hover:opacity-70">Compare</a>
+          <a href="#support" class="hover:opacity-70">Support</a>
+        </nav>
+
+        <!-- Right: Controls -->
+        <div class="flex items-center gap-2">
+          <button @click="toggleSearch()" class="p-2 rounded hover:bg-black/5 dark:hover:bg-white/10" aria-label="Search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button @click="darkMode = !darkMode" class="p-2 rounded hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+            <template x-if="!darkMode"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg></template>
+            <template x-if="darkMode"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95 6.95l-1.41-1.41M6.46 6.46L5.05 5.05m12.02 0l-1.41 1.41M6.46 17.54l-1.41 1.41"/></svg></template>
+          </button>
+          <button class="md:hidden p-2 rounded hover:bg-black/5 dark:hover:bg-white/10" @click="mobileOpen = !mobileOpen" aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- Mobile menu -->
+      <div x-show="mobileOpen" x-transition class="md:hidden border-t border-black/10 dark:border-white/10 pb-3">
+        <nav class="flex flex-col pt-3 gap-2 text-sm">
+          <a href="#products" class="px-2 py-2 rounded hover:bg-black/5 dark:hover:bg-white/10">Products</a>
+          <a href="#features" class="px-2 py-2 rounded hover:bg-black/5 dark:hover:bg-white/10">Features</a>
+          <a href="#compare" class="px-2 py-2 rounded hover:bg-black/5 dark:hover:bg-white/10">Compare</a>
+          <a href="#support" class="px-2 py-2 rounded hover:bg-black/5 dark:hover:bg-white/10">Support</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Overlay -->
+  <section x-show="searchOpen" x-transition.opacity.duration.200ms @keydown.escape.window="searchOpen=false" class="fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/50" @click="searchOpen=false"></div>
+    <div class="absolute left-1/2 top-6 w-[92vw] max-w-3xl -translate-x-1/2">
+      <div class="header-blur bg-white/80 dark:bg-neutral-900/80 rounded-xl border border-black/10 dark:border-white/10 shadow-2xl">
+        <div class="flex items-center gap-3 px-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input x-ref="search" type="search" placeholder="Search Nova…" class="w-full bg-transparent py-4 outline-none placeholder:opacity-60" />
+          <kbd class="text-xs opacity-60">ESC</kbd>
+        </div>
+        <div class="border-t border-black/10 dark:border-white/10 px-4 py-3 text-sm">
+          <p class="opacity-70">Try: <button @click="quickSearch('Nova Air Pro')" class="underline hover:no-underline">Nova Air Pro</button>, <button @click="quickSearch('Nova Watch 6') " class="underline hover:no-underline">Nova Watch 6</button>, <button @click="quickSearch('Studio Display 5K') " class="underline hover:no-underline">Studio Display 5K</button></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero with Parallax -->
+  <section id="hero" class="relative h-[86vh] min-h-[560px] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 parallax" style="background-image:url('https://images.unsplash.com/photo-1484704849700-f032a568e944?q=80&w=2240&auto=format&fit=crop');" data-parallax data-speed="0.25" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/30 to-white dark:from-neutral-900/60 dark:via-neutral-900/30 dark:to-neutral-900"></div>
+
+    <div class="relative z-10 mx-auto max-w-6xl px-6 text-center">
+      <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[0.95]">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-black to-neutral-600 dark:from-white dark:to-neutral-300">Beautifully simple.</span><br/>
+        <span class="text-2xl sm:text-3xl font-medium opacity-80">Meet the new <span class="font-semibold">Nova Air Pro</span>.</span>
+      </h1>
+      <p class="mt-6 text-lg md:text-xl opacity-80 max-w-3xl mx-auto">Feather-light. All-day battery. A display that melts into the bezel. Crafted from recycled aluminum.</p>
+      <div class="mt-8 flex items-center justify-center gap-3">
+        <a href="#products" class="inline-flex items-center gap-2 rounded-full bg-black text-white px-5 py-3 text-sm font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-black">
+          Shop now <span aria-hidden="true">→</span>
+        </a>
+        <a href="#video" class="inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10">
+          Watch film
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Slider -->
+  <section id="products" class="py-16 md:py-24">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="flex items-end justify-between mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold">Featured</h2>
+        <div class="flex items-center gap-2">
+          <button class="prev p-2 rounded hover:bg-black/5 dark:hover:bg:white/10" aria-label="Previous">‹</button>
+          <button class="next p-2 rounded hover:bg-black/5 dark:hover:bg:white/10" aria-label="Next">›</button>
+        </div>
+      </div>
+
+      <div class="swiper" data-aos="fade-up">
+        <div class="swiper-wrapper">
+          <!-- Slide 1 -->
+          <div class="swiper-slide">
+            <div class="relative overflow-hidden rounded-3xl bg-neutral-100 dark:bg-neutral-800 p-8 md:p-12 min-h-[420px] flex items-end">
+              <img loading="lazy" alt="Nova Air Pro" class="absolute right-2 top-2 w-[520px] max-w-[65%] drop-shadow-2xl select-none pointer-events-none"
+                src="https://images.unsplash.com/photo-1593642634367-d91a135587b5?q=80&w=1400&auto=format&fit=crop" />
+              <div class="relative max-w-sm">
+                <p class="text-sm uppercase tracking-widest opacity-70">Laptop</p>
+                <h3 class="text-3xl md:text-4xl font-bold">Nova Air Pro</h3>
+                <p class="mt-2 opacity-80">Ultra-thin. Fanless design. Pure focus.</p>
+                <a href="#" class="mt-6 inline-flex items-center gap-2 text-sm font-medium underline decoration-2 underline-offset-4">Learn more →</a>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="swiper-slide">
+            <div class="relative overflow-hidden rounded-3xl bg-neutral-100 dark:bg-neutral-800 p-8 md:p-12 min-h-[420px] flex items-end">
+              <img loading="lazy" alt="Nova Watch" class="absolute right-4 top-4 w-[420px] max-w-[60%] drop-shadow-2xl pointer-events-none"
+                src="https://images.unsplash.com/photo-1518441902119-0f3f710f64c2?q=80&w=1400&auto=format&fit=crop" />
+              <div class="relative max-w-sm">
+                <p class="text-sm uppercase tracking-widest opacity-70">Wearable</p>
+                <h3 class="text-3xl md:text-4xl font-bold">Nova Watch 6</h3>
+                <p class="mt-2 opacity-80">Health, reimagined. With Satellite SOS.</p>
+                <a href="#" class="mt-6 inline-flex items-center gap-2 text-sm font-medium underline decoration-2 underline-offset-4">Learn more →</a>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="swiper-slide">
+            <div class="relative overflow-hidden rounded-3xl bg-neutral-100 dark:bg-neutral-800 p-8 md:p-12 min-h-[420px] flex items-end">
+              <img loading="lazy" alt="Nova Phone" class="absolute right-6 top-6 w-[360px] max-w-[55%] drop-shadow-2xl pointer-events-none"
+                src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1400&auto=format&fit=crop" />
+              <div class="relative max-w-sm">
+                <p class="text-sm uppercase tracking-widest opacity-70">Phone</p>
+                <h3 class="text-3xl md:text-4xl font-bold">Nova Phone X</h3>
+                <p class="mt-2 opacity-80">A camera that sees in the dark.</p>
+                <a href="#" class="mt-6 inline-flex items-center gap-2 text-sm font-medium underline decoration-2 underline-offset-4">Learn more →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Split section with subtle parallax cards -->
+  <section id="features" class="py-16 md:py-24">
+    <div class="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-8 items-center">
+      <div data-aos="fade-right">
+        <h2 class="text-3xl md:text-4xl font-bold leading-tight">Power that whispers.</h2>
+        <p class="mt-4 opacity-80 text-lg">Custom silicon. Neural engines that blaze through edits and code. All in silence.</p>
+        <ul class="mt-6 space-y-3">
+          <li class="flex items-start gap-3"><span class="mt-0.5">⚡</span><span>Up to 22-hour battery life</span></li>
+          <li class="flex items-start gap-3"><span class="mt-0.5">🧠</span><span>Next-gen 3nm architecture</span></li>
+          <li class="flex items-start gap-3"><span class="mt-0.5">🛡️</span><span>On-device privacy and Secure Enclave</span></li>
+        </ul>
+      </div>
+      <div class="relative" data-aos="fade-left">
+        <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+          <img src="https://images.unsplash.com/photo-1550525811-e5869dd03032?q=80&w=1600&auto=format&fit=crop" alt="Laptop on table" class="w-full h-[420px] object-cover">
+          <div class="absolute inset-0 bg-gradient-to-tr from-black/50 via-transparent to-black/40"></div>
+          <div class="absolute bottom-4 left-4 right-4 glass rounded-2xl text-white p-4 shadow-glass">
+            <p class="text-sm uppercase tracking-widest opacity-80">Studio Display</p>
+            <p class="text-lg font-semibold">5K retina, TrueTone, 600 nits</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Video hero -->
+  <section id="video" class="relative overflow-hidden">
+    <div class="aspect-[16/9] md:rounded-[2.5rem] mx-auto max-w-6xl px-6">
+      <video class="w-full h-full object-cover rounded-[2.5rem]" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1600&auto=format&fit=crop">
+        <source src="https://cdn.coverr.co/videos/coverr-laptop-typing-1618/1080p.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="mx-auto max-w-3xl text-center px-6 mt-6 md:mt-10">
+      <h3 class="text-2xl md:text-3xl font-bold">A display that disappears.</h3>
+      <p class="opacity-80 mt-2">120Hz ProMotion, calibrated for colorists. True blacks in dark mode.</p>
+    </div>
+  </section>
+
+  <!-- Horizontal snap carousel -->
+  <section class="py-16 md:py-24">
+    <div class="mx-auto max-w-6xl px-6">
+      <h3 class="text-2xl md:text-3xl font-bold mb-6">Finishes that feel inevitable.</h3>
+    </div>
+    <div class="relative">
+      <div class="no-scrollbar flex gap-6 overflow-x-auto px-6 snap-x snap-mandatory">
+        <div class="min-w-[84vw] sm:min-w-[520px] snap-start">
+          <div class="relative h-[360px] rounded-3xl overflow-hidden">
+            <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?q=80&w=1600&auto=format&fit=crop" alt="Finish 1">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm uppercase opacity-80">Finish</p>
+              <p class="text-xl font-semibold">Matte Graphite</p>
+            </div>
+          </div>
+        </div>
+        <div class="min-w-[84vw] sm:min-w-[520px] snap-start">
+          <div class="relative h-[360px] rounded-3xl overflow-hidden">
+            <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1593431161842-7f9b18b0f749?q=80&w=1600&auto=format&fit=crop" alt="Finish 2">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm uppercase opacity-80">Finish</p>
+              <p class="text-xl font-semibold">Starlight Silver</p>
+            </div>
+          </div>
+        </div>
+        <div class="min-w-[84vw] sm:min-w-[520px] snap-start">
+          <div class="relative h-[360px] rounded-3xl overflow-hidden">
+            <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop" alt="Finish 3">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 text-white">
+              <p class="text-sm uppercase opacity-80">Finish</p>
+              <p class="text-xl font-semibold">Deep Midnight</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison -->
+  <section id="compare" class="py-16 md:py-24">
+    <div class="mx-auto max-w-6xl px-6">
+      <h3 class="text-2xl md:text-3xl font-bold mb-6">Pick your Nova.</h3>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="rounded-3xl border p-6 hover:shadow-lg transition" data-aos="fade-up">
+          <h4 class="text-xl font-semibold">Nova Air</h4>
+          <p class="opacity-80 mt-1">Feather light, everyday performance.</p>
+          <ul class="mt-4 space-y-2 text-sm">
+            <li>13.4” Retina, 500 nits</li>
+            <li>Up to 16GB unified memory</li>
+            <li>18-hour battery life</li>
+          </ul>
+          <p class="mt-6 font-semibold text-lg">From £999</p>
+          <button class="mt-4 w-full rounded-full bg-black text-white px-4 py-2 text-sm">Buy</button>
+        </div>
+        <div class="rounded-3xl border p-6 hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="100">
+          <h4 class="text-xl font-semibold">Nova Air Pro</h4>
+          <p class="opacity-80 mt-1">Silence, speed, and all-day battery.</p>
+          <ul class="mt-4 space-y-2 text-sm">
+            <li>14.2” Retina, 600 nits</li>
+            <li>Up to 24GB unified memory</li>
+            <li>22-hour battery life</li>
+          </ul>
+          <p class="mt-6 font-semibold text-lg">From £1,399</p>
+          <button class="mt-4 w-full rounded-full bg-black text-white px-4 py-2 text-sm">Buy</button>
+        </div>
+        <div class="rounded-3xl border p-6 hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="200">
+          <h4 class="text-xl font-semibold">Nova Studio</h4>
+          <p class="opacity-80 mt-1">For pros who push pixels and physics.</p>
+          <ul class="mt-4 space-y-2 text-sm">
+            <li>16.2” Retina, 120Hz</li>
+            <li>Up to 64GB unified memory</li>
+            <li>Dual-fan thermal core</li>
+          </ul>
+          <p class="mt-6 font-semibold text-lg">From £1,999</p>
+          <button class="mt-4 w-full rounded-full bg-black text-white px-4 py-2 text-sm">Buy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="support" class="py-16 md:py-24">
+    <div class="mx-auto max-w-4xl px-6">
+      <h3 class="text-2xl md:text-3xl font-bold mb-6">Frequently asked</h3>
+      <div class="divide-y border rounded-2xl">
+        <details class="group p-5 open:bg-black/[0.03] dark:open:bg-white/[0.04]">
+          <summary class="flex items-center justify-between cursor-pointer marker:hidden">
+            <span>Is Nova Air Pro good for creators?</span>
+            <span class="transition group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 opacity-80">Yes. It handles 4K timelines, RAW photo workflows, and large codebases smoothly.</p>
+        </details>
+        <details class="group p-5 open:bg-black/[0.03] dark:open:bg-white/[0.04]">
+          <summary class="flex items-center justify-between cursor-pointer marker:hidden">
+            <span>Does it support external GPUs?</span>
+            <span class="transition group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 opacity-80">Not required — but yes, via Thunderbolt 4 for certain pro workflows.</p>
+        </details>
+        <details class="group p-5 open:bg-black/[0.03] dark:open:bg-white/[0.04]">
+          <summary class="flex items-center justify-between cursor-pointer marker:hidden">
+            <span>What’s the warranty?</span>
+            <span class="transition group-open:rotate-180">⌄</span>
+          </summary>
+          <p class="mt-3 opacity-80">Two years of hardware coverage and 90 days of phone support.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky Buy Bar -->
+  <div x-show="ctaVisible" x-transition class="fixed bottom-4 inset-x-0 z-50 flex justify-center">
+    <div class="header-blur bg-white/80 dark:bg-neutral-900/80 border border-black/10 dark:border-white/10 rounded-full shadow-xl px-4 py-2 flex items-center gap-3">
+      <span class="text-sm hidden sm:block">Ready when you are.</span>
+      <a href="#compare" class="rounded-full bg-black text-white text-sm px-4 py-2">Choose your Nova</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-black/10 dark:border-white/10 py-10">
+    <div class="mx-auto max-w-6xl px-6 text-sm opacity-80">
+      <div class="flex items-center justify-between">
+        <p>© <span x-text="new Date().getFullYear()"></span> Nova Inc. All rights reserved.</p>
+        <div class="flex items-center gap-4">
+          <a href="#" class="hover:opacity-70">Privacy</a>
+          <a href="#" class="hover:opacity-70">Terms</a>
+          <a href="#" class="hover:opacity-70">Contact</a>
+        </div>
+      </div>
+      <p class="mt-4">Built with Tailwind, Alpine, AOS, and Swiper. Demo content & images for showcase only.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    function site(){
+      return {
+        darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
+        scrolled: false,
+        mobileOpen: false,
+        searchOpen: false,
+        ctaVisible: false,
+        toggleSearch(){
+          this.searchOpen = !this.searchOpen;
+          this.$nextTick(() => { if(this.searchOpen && this.$refs.search) this.$refs.search.focus() })
+        },
+        quickSearch(q){
+          this.searchOpen = false;
+          alert('Searching for: ' + q);
+        }
+      }
+    }
+
+    // Scroll logic
+    const progress = document.getElementById('progress');
+    document.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      document.querySelector('header').__x.$data.scrolled = y > 8;
+
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      progress.style.width = ((y / docHeight) * 100) + '%';
+
+      document.querySelectorAll('[data-parallax]').forEach((el) => {
+        const speed = parseFloat(el.getAttribute('data-speed')) || 0.2;
+        el.style.transform = `translateY(${y * speed}px)`;
+      });
+
+      const heroBottom = document.getElementById('hero').getBoundingClientRect().bottom;
+      const compareTop = document.getElementById('compare').getBoundingClientRect().top;
+      document.querySelector('body').__x.$data.ctaVisible = heroBottom < 0 && compareTop > 200;
+    }, { passive: true });
+
+    // Swiper init
+    window.addEventListener('load', () => {
+      new Swiper('.swiper', {
+        slidesPerView: 1.05,
+        spaceBetween: 16,
+        breakpoints: {
+          768: { slidesPerView: 2, spaceBetween: 20 },
+          1024: { slidesPerView: 2.3, spaceBetween: 24 }
+        },
+        navigation: { nextEl: '.next', prevEl: '.prev' }
+      });
+    });
+
+    // AOS init + icons
+    window.addEventListener('load', () => {
+      AOS.init({ duration: 700, once: true, easing: 'ease-out' });
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
